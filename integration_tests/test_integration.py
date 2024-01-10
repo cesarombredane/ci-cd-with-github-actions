@@ -6,9 +6,9 @@ from selenium.webdriver.common.by import By
 class TestIntegration(unittest.TestCase):
   def setUp(self):
     options = webdriver.ChromeOptions()
-    options.addArguments("--no-sandbox")
-    options.addArguments("--disable-dev-shm-usage")
-    options.addArguments("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--headless")
     self.driver = webdriver.Chrome(options)
     self.driver.get('http://localhost:5000')
   
