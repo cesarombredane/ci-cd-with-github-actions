@@ -5,7 +5,11 @@ from selenium.webdriver.common.by import By
 
 class TestIntegration(unittest.TestCase):
   def setUp(self):
-    self.driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.addArguments("--no-sandbox")
+    options.addArguments("--disable-dev-shm-usage")
+    options.addArguments("--headless")
+    self.driver = webdriver.Chrome(options)
     self.driver.get('http://localhost:5000')
   
   def teardown_method(self, method):
