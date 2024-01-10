@@ -1,0 +1,58 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Tests
+        run: python -m unittest discover tests
+
+      - name: Build Docker image
+        run: docker build -t cesarombredane/ci-cd-with-github-actions .
+
+      - name: start docker
+        run: docker run -d -p 5000:5000 cesarombredane/ci-cd-with-github-actions
+
+      - name: Run integration tests
+        run: python -m unittest discover integration_tests
+
+      - name: Stop docker
+        run: docker stop $(docker ps -q --filter ancestor=cesarombredane/ci-cd-with-github-actions )
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: cesarombredane/ci-cd-with-github-actions
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
